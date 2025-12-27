@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRA Job Fair 2026</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans Thai"', 'sans-serif'],
+          },
+          animation: {
+            'float-slow': 'float 18s infinite linear',
+            'float-medium': 'float 14s infinite linear',
+            'float-fast': 'float 11s infinite linear',
+          },
+          keyframes: {
+            float: {
+              '0%': { transform: 'translateY(0) rotate(0deg)', opacity: '0' },
+              '10%': { opacity: '0.4' },
+              '90%': { opacity: '0.4' },
+              '100%': { transform: 'translateY(-120vh) rotate(360deg)', opacity: '0' },
+            }
+          }
+        },
+      },
+    }
+  </script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* Force Font */
+    body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, p, span, div, label {
+        font-family: 'Noto Sans Thai', sans-serif !important;
+    }
+    
+    body { background-color: #f8fafc; overflow-x: hidden; scroll-behavior: smooth; }
+
+    /* Form UI */
+    .option-card { position: relative; background: white; border: 2px solid #e2e8f0; border-radius: 1rem; padding: 1.5rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 1rem; height: 100%; z-index: 10; }
+    .option-card:hover { border-color: #d8b4fe; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .option-card.selected { border-color: #9333ea; background-color: #f3e8ff; box-shadow: 0 4px 12px rgba(147, 51, 234, 0.15); }
+    .check-badge { position: absolute; top: 12px; right: 12px; width: 24px; height: 24px; background-color: #9333ea; color: white; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 12px; animation: popIn 0.3s; }
+    .option-card.selected .check-badge { display: flex; }
+    .date-card { border: 2px solid #f3e8ff; background-color: #ffffff; border-radius: 1rem; padding: 1rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: start; gap: 1rem; }
+    .date-card:hover { border-color: #d8b4fe; background-color: #fbf7ff; }
+    .date-card.selected { border-color: #9333ea; background-color: #f3e8ff; box-shadow: 0 0 0 2px #d8b4fe; }
+    .progress-fill { transition: width 0.5s ease-out; }
+    
+    @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.5s ease-out; }
+    .hidden { display: none !important; }
+
+    /* ================= NEW CHECKMARK ANIMATION (Robust Version) ================= */
+    .success-animation { margin: 0 auto 30px; display: flex; justify-content: center; }
+    
+    .checkmark {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        display: block;
+        stroke-width: 3;
+        stroke: #fff;
+        stroke-miterlimit: 10;
+        box-shadow: inset 0px 0px 0px #4bb777; /* Default Green Background */
+        animation: none; /* Disable default animation to prevent glitches */
+    }
+
+    /* Active State (Triggered by JS) */
+    .checkmark.active {
+        animation: fillGreen .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+    }
+
+    .checkmark__circle {
+        stroke-dasharray: 166;
+        stroke-dashoffset: 166;
+        stroke-width: 2;
+        stroke-miterlimit: 10;
+        stroke: #4bb777;
+        fill: none;
+    }
+    
+    .checkmark.active .checkmark__circle {
+        animation: strokeCircle 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+    }
+
+    .checkmark__check {
+        transform-origin: 50% 50%;
+        stroke-dasharray: 48;
+        stroke-dashoffset: 48;
+    }
+    
+    .checkmark.active .checkmark__check {
+        animation: strokeCheck 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+    }
+
+    @keyframes strokeCircle { 100% { stroke-dashoffset: 0; } }
+    @keyframes strokeCheck { 100% { stroke-dashoffset: 0; } }
+    @keyframes scale { 0%, 100% { transform: none; } 50% { transform: scale3d(1.1, 1.1, 1); } }
+    @keyframes fillGreen { 100% { box-shadow: inset 0px 0px 0px 60px #4bb777; } }
+
+    /* Modal Backdrop */
+    .modal-backdrop { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); }
+
+    /* Background Floating Icons */
+    .bg-icons-container { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; background: radial-gradient(circle at center, #f8fafc 0%, #eff6ff 100%); }
+    .floating-icon { position: absolute; color: #c7d2fe; opacity: 0; bottom: -100px; text-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    /* SweetAlert Customization */
+    div:where(.swal2-container) div:where(.swal2-popup) {
+      border-radius: 1.5rem !important;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen relative">
+
+  <div class="bg-icons-container">
+      <i class="fas fa-stethoscope text-9xl floating-icon left-[5%] animate-float-slow" style="animation-delay: 0s;"></i>
+      <i class="fas fa-dna text-8xl floating-icon left-[25%] animate-float-medium" style="animation-delay: 5s;"></i>
+      <i class="fas fa-briefcase-medical text-9xl floating-icon left-[50%] animate-float-fast" style="animation-delay: 2s;"></i>
+      <i class="fas fa-database text-8xl floating-icon left-[70%] animate-float-medium" style="animation-delay: 8s;"></i>
+      <i class="fas fa-microchip text-9xl floating-icon left-[90%] animate-float-slow" style="animation-delay: 3s;"></i>
+      <i class="fas fa-microscope text-7xl floating-icon left-[15%] animate-float-fast" style="animation-delay: 12s;"></i>
+      <i class="fas fa-server text-8xl floating-icon left-[80%] animate-float-slow" style="animation-delay: 6s;"></i>
+  </div>
+
+  <div id="formSection" class="w-full relative z-10">
+      <header class="w-full bg-gradient-to-r from-blue-900 to-indigo-900 text-white pt-16 pb-36 shadow-2xl relative overflow-hidden">
+        
+        <div class="absolute inset-0 opacity-10 pointer-events-none">
+           <i class="fas fa-stethoscope absolute top-10 left-10 text-[10rem] transform -rotate-12"></i>
+           <i class="fas fa-microscope absolute bottom-10 right-10 text-[8rem] transform rotate-12"></i>
+        </div>
+
+        <div class="container mx-auto px-4 text-center relative z-10">
+          
+          <h2 class="text-base md:text-lg font-light mb-2 text-blue-200 tracking-wide">นิทรรศการแนะแนวอาชีพและการศึกษาต่อราชวิทยาลัยจุฬาภรณ์</h2>
+          <h1 class="text-3xl md:text-5xl font-bold mb-8 text-yellow-300 drop-shadow-lg tracking-wide">CRA Job Fair & Education 2026</h1>
+          
+          <div class="inline-flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 bg-white/10 backdrop-blur-md px-8 py-5 rounded-3xl border border-white/20 shadow-lg mb-8 max-w-3xl mx-auto">
+            
+            <div class="flex items-center gap-3">
+               <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                  <i class="far fa-calendar-alt text-yellow-300 text-xl"></i>
+               </div>
+               <div class="text-left">
+                  <p class="text-xs text-blue-200 uppercase font-bold">วันจัดกิจกรรม</p>
+                  <p class="text-lg font-medium">12-13 กุมภาพันธ์ 2569</p>
+               </div>
+            </div>
+
+            <div class="hidden md:block w-px h-10 bg-white/20"></div>
+
+            <div class="flex items-center gap-3">
+               <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                  <i class="fas fa-map-marker-alt text-red-400 text-xl"></i>
+               </div>
+               <div class="text-left">
+                  <p class="text-xs text-blue-200 uppercase font-bold">สถานที่</p>
+                  <p class="text-sm md:text-base font-medium leading-tight">
+                    Convention Hall ชั้น 6<br>
+                    <span class="text-xs md:text-sm font-light text-gray-200">อาคารกรมพระศรีสวางควัฒน รพ.จุฬาภรณ์</span>
+                  </p>
+               </div>
+            </div>
+
+          </div>
+<br>
+          <div class="inline-block relative">
+             <div class="absolute inset-0 bg-indigo-500 blur-xl opacity-30 rounded-full"></div>
+             <p class="relative z-10 text-xl md:text-2xl font-bold text-white border-b-2 border-yellow-300 pb-1 px-4 inline-block">
+                แบบฟอร์มลงทะเบียนผู้ประกอบการออกบูธ
+             </p>
+          </div>
+
+        </div>
+      </header>
+
+      <main class="relative -mt-24 px-4 pb-20 container mx-auto max-w-5xl">
+        <form id="craForm" onsubmit="event.preventDefault(); return false;" class="bg-white/95 backdrop-blur-sm rounded-[2.5rem] shadow-2xl border border-gray-100 overflow-hidden">
+          
+          <div id="progressBarContainer" class="hidden bg-gray-50/80 border-b border-gray-100 py-8 px-6">
+             <div class="relative max-w-2xl mx-auto">
+                <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -translate-y-1/2 rounded-full z-0"></div>
+                <div id="progressFill" class="absolute top-1/2 left-0 h-1 bg-gradient-to-r from-blue-600 to-purple-600 -translate-y-1/2 rounded-full z-0 progress-fill" style="width: 0%;"></div>
+                <div class="relative z-10 flex justify-between w-full">
+                   <div class="flex flex-col items-center"><div id="step1-circle" class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg ring-4 ring-white">1</div><span class="mt-2 text-xs font-bold text-blue-800">ข้อมูลทั่วไป</span></div>
+                   <div class="flex flex-col items-center"><div id="step2-circle" class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-gray-400 bg-white border-2 border-gray-200">2</div><span class="mt-2 text-xs text-gray-400">ผู้ประสานงาน</span></div>
+                   <div class="flex flex-col items-center"><div id="step3-circle" class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-gray-400 bg-white border-2 border-gray-200">3</div><span class="mt-2 text-xs text-gray-400">รายละเอียดบูธ</span></div>
+                </div>
+             </div>
+          </div>
+
+          <div class="p-6 md:p-12">
+            <div id="step1" class="fade-in">
+               <div class="rounded-3xl p-8 mb-10" style="background-color: #F8F5FF; border-left: 6px solid #9333ea;">
+                  <div class="flex items-center gap-4 mb-6">
+                     <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background-color: #E0D0FD;"><i class="fas fa-file-alt text-2xl text-purple-600"></i></div>
+                     <h3 class="font-bold text-gray-900 text-lg md:text-xl">ขอความร่วมมือในสิ่งที่ผู้ประกอบการต้องจัดเตรียม</h3>
+                  </div>
+                  <ul class="space-y-3 pl-2">
+                     <li class="flex items-start gap-4"><i class="fas fa-check text-green-500 mt-1"></i><span class="text-gray-700">เปิดรับสมัครตำแหน่งนักศึกษาฝึกงาน / Part-time</span></li>
+                     <li class="flex items-start gap-4"><i class="fas fa-check text-green-500 mt-1"></i><span class="text-gray-700">เปิดรับสมัครงานในทุกตำแหน่งงานว่าง</span></li>
+                     <li class="flex items-start gap-4"><i class="fas fa-check text-green-500 mt-1"></i><span class="text-gray-700">เปิดรับสมัครงานในตำแหน่งงาน Part-time</span></li>
+                     <li class="flex items-start gap-4"><i class="fas fa-check text-green-500 mt-1"></i><span class="text-gray-700">เปิดรับ CV และ Resume ของผู้มาร่วมงาน</span></li>
+                     <li class="flex items-start gap-4"><i class="fas fa-check text-green-500 mt-1"></i><span class="text-gray-700">เปิดรับสมัครตำแหน่งสำหรับผู้พิการ (ถ้ามี)</span></li>
+                     <li class="flex items-start gap-4"><i class="fas fa-check text-green-500 mt-1"></i><span class="text-gray-700">ส่งข้อมูลพนักงานในองค์กรของท่านที่เป็นศิษย์เก่าราชวิทยาลัยจุฬาภรณ์ (ถ้ามี)</span></li>
+                  </ul>
+               </div>
+
+               <label class="block font-bold text-gray-800 mb-6 text-xl flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl flex items-center justify-center text-purple-600 ">
+                     <i class="fas fa-question-circle text-lg"></i>
+                  </div>
+                  หน่วยงานของท่านมีความประสงค์เข้าร่วมออกบูธหรือไม่ <span class="text-red-500">*</span>
+               </label>
+
+               <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  <div class="option-card" onclick="selectStatus('join', this)">
+                     <div class="check-badge"><i class="fas fa-check"></i></div>
+                     <div class="w-16 h-16 rounded-full flex-shrink-0 flex items-center justify-center bg-white border-4 border-purple-500 text-purple-500"><i
+                          class="fas fa-check text-xl"></i></div>
+                     <div><h4 class="font-bold text-gray-800 text-lg">ต้องการเข้าร่วมออกบูธ</h4><p class="text-sm text-gray-500">พร้อมเข้าร่วมงาน</p></div>
+                  </div>
+                  <div class="option-card" onclick="selectStatus('no', this)">
+                     <div class="check-badge"><i class="fas fa-check"></i></div>
+                     <div class="w-16 h-16 rounded-full flex-shrink-0 flex items-center justify-center bg-white border-4 border-red-400 text-red-400"><i class="fas fa-times text-2xl"></i></div>
+                     <div><h4 class="font-bold text-gray-800 text-lg">ยังไม่สะดวกเข้าร่วม</h4><p class="text-sm text-gray-500">ไม่สามารถเข้าร่วมในปีนี้</p></div>
+                  </div>
+               </div>
+               <input type="hidden" name="status" id="inputStatus">
+               
+               <div id="noJoinForm" class="hidden bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm mt-8 fade-in scroll-mt-20">
+                  <div class="mb-6">
+                     <label class="block font-bold text-gray-700 mb-3 text-lg flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center"><i class="fas fa-building text-xl"></i></div>
+                        ชื่อหน่วยงาน <span class="text-red-500">*</span>
+                     </label>
+                     <input type="text" name="companyNo" id="companyNo" class="w-full p-4 border border-gray-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-purple-500 transition shadow-sm" placeholder="ระบุชื่อหน่วยงาน">
+                  </div>
+                  <div class="mb-8">
+                     <label class="block font-bold text-gray-700 mb-3 text-lg flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center"><i class="fas fa-comment-alt text-xl"></i></div>
+                        เหตุผลที่ไม่สะดวกเข้าร่วม (ถ้ามี)
+                     </label>
+                     <textarea name="declineReason" id="declineReason" class="w-full p-4 border border-gray-200 rounded-xl bg-white outline-none focus:ring-2 focus:ring-purple-500 transition shadow-sm" rows="3" placeholder="ระบุเหตุผล..."></textarea>
+                  </div>
+                  <button type="button" id="btnSubmitDecline" onclick="submitForm('no')" class="w-full bg-red-500 text-white font-bold py-4 rounded-xl text-lg hover:bg-slate-600 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1">ส่งข้อมูลสละสิทธิ์</button>
+               </div>
+
+               <div id="joinForm" class="hidden space-y-10 scroll-mt-20">
+                  <div>
+                     <label class="block text-xl font-bold text-gray-800 mb-6">ประเภทการเข้าร่วมของหน่วยงานคุณ <span class="text-red-500">*</span></label>
+                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="option-card flex-col items-center text-center py-8" onclick="handleType('new', this)">
+                           <div class="check-badge"><i class="fas fa-check"></i></div>
+                           <div class="w-16 h-16 rounded-full flex-shrink-0 flex items-center justify-center bg-purple-50 text-purple-600 mb-3"><i class="fas fa-plus text-2xl"></i></div>
+                           <h4 class="font-bold text-gray-800">บริษัทลงทะเบียนใหม่</h4><p class="text-sm text-gray-500">เข้าร่วมครั้งแรก</p>
+                        </div>
+                        <div class="option-card flex-col items-center text-center py-8" onclick="handleType('return', this)">
+                           <div class="check-badge"><i class="fas fa-check"></i></div>
+                           <div class="w-16 h-16 rounded-full flex-shrink-0 flex items-center justify-center bg-purple-50 text-purple-600 mb-3"><i class="fas fa-sync-alt text-2xl"></i></div>
+                           <h4 class="font-bold text-gray-800">บริษัทที่ร่วมงานปีที่ผ่านมา</h4><p class="text-sm text-gray-500">กลับมาอีกครั้ง</p>
+                        </div>
+                        <div class="option-card flex-col items-center text-center py-8" onclick="handleType('edu', this)">
+                           <div class="check-badge"><i class="fas fa-check"></i></div>
+                           <div class="w-16 h-16 rounded-full flex-shrink-0 flex items-center justify-center bg-purple-50 text-purple-600 mb-3"><i class="fas fa-book-open text-2xl"></i></div>
+                           <h4 class="font-bold text-gray-800">ด้านการศึกษา/ทำงานต่างประเทศ/สนับสนุน</h4><p class="text-sm text-gray-500">ออกบูธ/สนับสนุน</p>
+                        </div>
+                     </div>
+                     <input type="hidden" name="joinType" id="joinType">
+                  </div>
+                  <div id="dynamicContent" class="hidden mt-8 space-y-8 scroll-mt-20">
+                    <div id="newEduForm" class="hidden space-y-8 p-8 rounded-[2rem] bg-white border border-purple-100 shadow-sm fade-in">
+                       <div>
+                         <label class="block font-bold text-gray-700 mb-3 text-lg flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center"><i class="fas fa-building text-xl"></i></div>ชื่อหน่วยงาน / สถาบัน / ผู้สนับสนุน <span class="text-red-500">*</span></label>
+                         <input type="text" name="company" id="newEduName" class="w-full p-4 border-2 border-gray-100 rounded-2xl bg-gray-50 outline-none focus:bg-white focus:border-purple-500 transition shadow-sm" placeholder="กรอกชื่อหน่วยงานของคุณ">
+                       </div>
+                       <div>
+                         <label class="block font-bold text-gray-700 mb-3 text-lg flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center"><i class="fas fa-sitemap text-xl"></i></div>ประเภทองค์กรของหน่วยงาน <span class="text-red-500">*</span></label>
+                         <div class="relative">
+                           <select name="orgType" id="newEduOrgSelect" class="w-full p-4 border-2 border-gray-100 rounded-2xl bg-gray-50 outline-none focus:bg-white focus:border-purple-500 transition shadow-sm appearance-none cursor-pointer" onchange="handleOrgChange(this)"></select>
+                           <div class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"><i class="fas fa-chevron-down"></i></div>
+                         </div>
+                       </div>
+                       <div id="dateSelectionArea" class="hidden">
+                          <label class="block font-bold text-gray-700 mb-4 text-lg flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center"><i class="far fa-calendar-alt text-xl"></i></div>วันที่เข้าร่วมงาน <span class="text-red-500">*</span><span class="bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full ml-auto font-medium">ระบบแนะนำ</span></label>
+                          <div class="space-y-4">
+                             <div id="dateCard12" class="date-card group relative p-4 rounded-2xl border-2 border-transparent bg-white shadow-sm hover:border-blue-300 cursor-pointer transition-all" onclick="selectDateCard('12')">
+                                <div class="check-badge absolute top-4 right-4"><i class="fas fa-check text-white text-xs"></i></div>
+                                <div class="flex items-start gap-4">
+                                   <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0"><i class="fas fa-calendar-day text-2xl"></i></div>
+                                   <div><h4 class="font-bold text-gray-800 text-lg">12 กุมภาพันธ์ 2569</h4><p class="text-sm text-gray-500 mt-1">สำหรับสายโรงพยาบาล องค์กรด้านการแพทย์ และธุรกิจบริการสุขภาพ</p></div>
+                                </div>
+                             </div>
+                             <div id="dateCard13" class="date-card group relative p-4 rounded-2xl border-2 border-transparent bg-white shadow-sm hover:border-teal-300 cursor-pointer transition-all" onclick="selectDateCard('13')">
+                                <div class="check-badge absolute top-4 right-4"><i class="fas fa-check text-white text-xs"></i></div>
+                                <div class="flex items-start gap-4">
+                                   <div class="w-12 h-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center flex-shrink-0"><i class="fas fa-calendar-day text-2xl"></i></div>
+                                   <div><h4 class="font-bold text-gray-800 text-lg">13 กุมภาพันธ์ 2569</h4><p class="text-sm text-gray-500 mt-1">สำหรับสายเทคโนโลยี Data วิจัย อุตสาหกรรมอาหาร-ยา</p></div>
+                                </div>
+                             </div>
+                             <div id="dateCardBoth" class="date-card group relative p-4 rounded-2xl border-2 border-transparent bg-white shadow-sm hover:border-purple-300 cursor-pointer transition-all hidden" onclick="selectDateCard('both')">
+                                <div class="check-badge absolute top-4 right-4"><i class="fas fa-check text-white text-xs"></i></div>
+                                <div class="flex items-start gap-4">
+                                   <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0"><i class="fas fa-calendar-week text-2xl"></i></div>
+                                   <div><h4 class="font-bold text-gray-800 text-lg">เข้าร่วมทั้ง 2 วัน</h4><p class="text-sm text-gray-500 mt-1">สำหรับสถาบันการศึกษาและผู้สนับสนุน</p></div>
+                                </div>
+                             </div>
+                          </div>
+                          <input type="hidden" name="eventDate" id="eventDate">
+                       </div>
+                    </div>
+                    <div id="returningForm" class="hidden space-y-8 p-8 rounded-[2rem] border-l-8 border-green-400 bg-green-50/40 fade-in">
+                       <div>
+                         <label class="block font-bold text-gray-800 mb-3 text-lg flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center text-green-700"><i class="fas fa-search text-xl"></i></div>เลือกบริษัท / หน่วยงานของคุณ <span class="text-red-500">*</span></label>
+                         <div class="relative">
+                           <select name="returningCompany" id="returningSelect" class="w-full p-4 border-2 border-blue-200 rounded-2xl bg-white text-blue-900 font-medium outline-none focus:ring-4 focus:ring-blue-100 shadow-sm transition appearance-none cursor-pointer" onchange="handleReturningChange(this)"></select>
+                           <div class="absolute right-4 top-1/2 -translate-y-1/2 text-blue-400 pointer-events-none"><i class="fas fa-chevron-down"></i></div>
+                         </div>
+                       </div>
+                       <div id="returningAutoInfo" class="hidden space-y-4 border-t border-green-200 pt-6">
+                          <div class="w-full p-5 border border-green-200 rounded-2xl bg-white flex items-center gap-5 shadow-sm relative overflow-hidden">
+                             <div class="absolute top-0 right-0 bg-green-100 text-green-700 text-xs px-3 py-1 rounded-bl-xl font-bold">เลือกอัตโนมัติ</div>
+                             <div class="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0 text-green-600"><i class="fas fa-building text-2xl"></i></div>
+                             <div><p class="text-xs text-gray-400 uppercase font-bold mb-1">ประเภทองค์กร</p><p id="autoOrgType" class="text-gray-800 font-bold text-lg">-</p></div>
+                             <input type="hidden" name="autoOrgTypeVal" id="autoOrgTypeVal">
+                          </div>
+                          <div class="w-full p-5 border border-green-200 rounded-2xl bg-white flex items-center gap-5 shadow-sm relative overflow-hidden">
+                             <div class="absolute top-0 right-0 bg-green-100 text-green-700 text-xs px-3 py-1 rounded-bl-xl font-bold">เลือกอัตโนมัติ</div>
+                             <div class="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0 text-green-600"><i class="far fa-calendar-check text-2xl"></i></div>
+                             <div><p class="text-xs text-gray-400 uppercase font-bold mb-1">วันที่เข้าร่วมงาน</p><p id="autoDateText" class="text-gray-800 font-bold text-lg">-</p><p id="autoDateDesc" class="text-sm text-gray-500 mt-1">-</p></div>
+                             <input type="hidden" name="autoDateVal" id="autoDateVal">
+                          </div>
+                       </div>
+                    </div>
+                  </div>
+                  <div class="text-right mt-10">
+                     <button type="button" id="btnNext1" onclick="changeStep(2)" class="hidden group relative px-8 py-3 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:scale-105 active:scale-95">
+                        <div class="absolute inset-0 -z-10 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 blur-lg transition-opacity duration-300 group-hover:opacity-50"></div>
+                        <span class="flex items-center gap-3 text-lg">ถัดไป <i class="fas fa-arrow-right animate-pulse"></i></span>
+                     </button>
+                  </div>
+               </div>
+            </div>
+            <div id="step2" class="hidden fade-in">
+               <div class="mb-10 pb-4 border-b border-gray-100">
+                 <h2 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-4"><div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-sm border border-blue-100"><i class="fas fa-user-tie text-2xl"></i></div>ข้อมูลผู้ประสานงาน</h2>
+               </div>
+               <div class="space-y-8 px-2 md:px-4">
+                  <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                     <div class="md:col-span-3">
+                        <label class="block font-bold text-gray-700 mb-3 ml-1 flex items-center gap-2"><i class="fas fa-venus-mars text-gray-400"></i> คำนำหน้า</label>
+                        <div class="relative">
+                           <select name="prefix" class="w-full p-4 border-2 border-gray-200 rounded-2xl bg-white outline-none focus:border-purple-500 appearance-none cursor-pointer transition hover:border-purple-300 shadow-sm text-gray-700">
+                              <option value="" disabled selected>เลือก</option><option>นาย</option><option>นาง</option><option>นางสาว</option>
+                           </select>
+                           <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400"><i class="fas fa-chevron-down"></i></div>
+                        </div>
+                     </div>
+                     <div class="md:col-span-4">
+                        <label class="block font-bold text-gray-700 mb-3 ml-1 flex items-center gap-2"><i class="fas fa-user text-gray-400"></i> ชื่อจริง <span class="text-red-500">*</span></label>
+                        <input type="text" name="firstName" class="w-full p-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-purple-500 transition shadow-sm focus:ring-4 focus:ring-purple-50 placeholder-ระบุชื่อจริง" required>
+                     </div>
+                     <div class="md:col-span-5">
+                        <label class="block font-bold text-gray-700 mb-3 ml-1 flex items-center gap-2"><i class="fas fa-signature text-gray-400"></i> นามสกุล <span class="text-red-500">*</span></label>
+                        <input type="text" name="lastName" class="w-full p-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-purple-500 transition shadow-sm focus:ring-4 focus:ring-purple-50 placeholder-ระบุนามสกุล" required>
+                     </div>
+                  </div>
+                  <div>
+                     <label class="block font-bold text-gray-700 mb-3 ml-1 flex items-center gap-2"><i class="fas fa-briefcase text-gray-400"></i> ตำแหน่ง <span class="text-red-500">*</span></label>
+                     <input type="text" name="position" class="w-full p-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-purple-500 transition shadow-sm focus:ring-4 focus:ring-purple-50 placeholder-ระบุตำแหน่งงาน" required>
+                  </div>
+                  <div class="relative">
+                     <label class="block font-bold text-gray-700 mb-3 ml-1 flex items-center gap-2"><i class="fas fa-envelope text-gray-400"></i> อีเมล <span class="text-red-500">*</span></label>
+                     <input type="text" name="email" id="emailInput" class="w-full p-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-purple-500 transition shadow-sm focus:ring-4 focus:ring-purple-50 placeholder-name@company.com" oninput="suggestEmail(this)" required>
+                     <div id="emailSuggest" class="hidden absolute w-full bg-white border border-gray-100 shadow-xl rounded-2xl mt-2 z-20 overflow-hidden"></div>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <div>
+                        <label class="block font-bold text-gray-700 mb-3 ml-1 flex items-center gap-2"><i class="fas fa-phone-alt text-gray-400"></i> เบอร์โทร <span class="text-red-500">*</span></label>
+                        <input type="tel" name="phone" class="w-full p-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-purple-500 transition shadow-sm focus:ring-4 focus:ring-purple-50 placeholder-0xx-xxx-xxxx" maxlength="12" oninput="formatPhone(this)" required>
+                     </div>
+                     <div>
+                        <label class="block font-bold text-gray-700 mb-3 ml-1 flex items-center gap-2"><i class="fas fa-hashtag text-gray-400"></i> เบอร์ต่อ</label>
+                        <input type="text" name="phoneExt" class="w-full p-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-purple-500 transition shadow-sm focus:ring-4 focus:ring-purple-50 placeholder-1234" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                     </div>
+                  </div>
+                  <div class="bg-gray-50 p-6 rounded-3xl border border-gray-100">
+                     <label class="block font-bold text-gray-800 mb-4 ml-1 flex items-center gap-2 text-lg"><i class="fab fa-line text-green-500 text-2xl"></i> Line Contact <span class="text-red-500">*</span></label>
+                     <div class="flex flex-col md:flex-row md:items-center gap-6">
+                        <div class="inline-flex bg-white p-1 rounded-full border-2 border-gray-200 shadow-sm relative w-fit h-[54px]">
+                           <div id="toggleBg" class="absolute top-1 left-1 w-[140px] h-[42px] bg-green-500 rounded-full transition-all duration-300 shadow-md"></div>
+                           <button type="button" class="relative z-10 w-[140px] h-full py-2 text-center font-bold text-white transition-colors duration-300 rounded-full" id="btnLineId" onclick="toggleLine('id')">Line ID</button>
+                           <button type="button" class="relative z-10 w-[140px] h-full py-2 text-center font-bold text-gray-500 transition-colors duration-300 rounded-full" id="btnLinePhone" onclick="toggleLine('phone')">เบอร์โทรศัพท์</button>
+                        </div>
+                        <div class="flex-grow w-full">
+                           <input type="hidden" name="lineType" id="lineType" value="id">
+                           <input type="text" name="lineId" id="lineInput" class="w-full p-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-green-500 transition shadow-sm focus:ring-4 focus:ring-green-50 placeholder-ระบุ Line ID" required>
+                           <input type="tel" name="linePhone" id="linePhoneInput" class="hidden w-full p-4 border-2 border-gray-200 rounded-2xl outline-none focus:border-green-500 transition shadow-sm focus:ring-4 focus:ring-green-50 placeholder-0xx-xxx-xxxx" maxlength="12" oninput="formatPhone(this)">
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="flex justify-between pt-12 mt-4 border-t border-gray-100">
+                  <button type="button" onclick="changeStep(1)" class="px-8 py-3 rounded-2xl border-2 border-gray-200 font-bold text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition">ย้อนกลับ</button>
+                  <button type="button" onclick="changeStep(3)" class="px-12 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition transform">ถัดไป</button>
+               </div>
+            </div>
+            <div id="step3" class="hidden fade-in">
+               <div class="mb-8 pb-4 border-b border-gray-100">
+                 <h2 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-4"><div class="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-600 shadow-sm border border-purple-100"><i class="fas fa-store text-2xl"></i></div>รายละเอียดบูธ</h2>
+               </div>
+               <div class="rounded-3xl p-8 mb-10 border border-blue-100 shadow-sm relative overflow-hidden" style="background: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%);">
+                  <div class="mb-6">
+                     <h4 class="font-bold text-gray-800 text-lg mb-4 flex items-center gap-2"><i class="fas fa-clock text-blue-600"></i> สิทธิพิเศษสำหรับผู้ที่มาร่วมออกบูธ</h4>
+                     <ul class="space-y-2 ml-6 text-sm text-gray-700">
+                        <li class="flex items-start gap-3"><i class="fas fa-check text-green-500 mt-1"></i> พื้นที่บูธขนาดมาตรฐาน 2x2 เมตร</li>
+                        <li class="flex items-start gap-3"><i class="fas fa-check text-green-500 mt-1"></i> โต๊ะกว้าง 1.8 เมตร จำนวน 1 ตัว พร้อมผ้าปูโต๊ะ</li>
+                        <li class="flex items-start gap-3"><i class="fas fa-check text-green-500 mt-1"></i> เก้าอี้ตามจำนวนผู้มาออกบูธ</li>
+                        <li class="flex items-start gap-3"><i class="fas fa-check text-green-500 mt-1"></i> จุดเชื่อมต่อระบบไฟ (เตรียมปลั๊กพ่วงมาเพิ่ม)</li>
+                        <li class="flex items-start gap-3"><i class="fas fa-check text-green-500 mt-1"></i> ที่จอดรถฟรีตลอดงาน</li>
+                     </ul>
+                  </div>
+                  <div>
+                     <h4 class="font-bold text-gray-800 text-lg mb-4 ml-6">สิ่งที่ต้องเตรียมมาเอง</h4>
+                     <ul class="space-y-2 ml-6 text-sm text-gray-700">
+                        <li class="flex items-start gap-3"><i class="fas fa-check text-green-500 mt-1"></i> สื่อประชาสัมพันธ์ /ตำแหน่งงาน/ ของตกแต่งบูธ</li>
+                        <li class="flex items-start gap-3"><i class="fas fa-check text-green-500 mt-1"></i> ปลั๊กพ่วงไฟ</li>
+                        <li class="flex items-start gap-3"><i class="fas fa-check text-green-500 mt-1"></i> อุปกรณ์อิเล็กทรอนิกส์ (Notebook/Tablet/TV)</li>
+                     </ul>
+                  </div>
+               </div>
+               <div class="space-y-10 px-2">
+                  <div>
+                     <label class="block font-bold text-gray-700 mb-4 text-lg flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600"><i class="fas fa-users"></i></div>
+                        จำนวนผู้มาออกบูธ <span class="text-red-500">*</span>
+                        <span class="text-sm text-gray-400 font-normal ml-auto">(สูงสุด 5 ท่าน)</span>
+                     </label>
+                     <div class="flex items-center gap-6 bg-white p-2 rounded-2xl border-2 border-gray-100 w-fit shadow-sm">
+                        <button type="button" onclick="adjStaff(-1)" class="w-12 h-12 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center transition hover:bg-gray-200 hover:text-gray-700 active:scale-95"><i class="fas fa-minus text-lg"></i></button>
+                        <input type="number" name="staffCount" id="staffCount" value="1" readonly class="w-16 text-center text-2xl font-bold text-gray-800 bg-transparent border-none outline-none">
+                        <button type="button" onclick="adjStaff(1)" class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center transition hover:bg-blue-200 hover:text-blue-800 active:scale-95"><i class="fas fa-plus text-lg"></i></button>
+                     </div>
+                  </div>
+                  <div>
+                     <label class="block font-bold text-gray-700 mb-4 text-lg flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-pink-100 flex items-center justify-center text-pink-600"><i class="fas fa-gift"></i></div>
+                        คำขอพิเศษ (เลือกได้มากกว่า 1 ข้อ)
+                     </label>
+                     <div class="space-y-4 pl-1">
+                        <label class="flex items-start gap-4 p-5 border-2 border-gray-100 rounded-2xl cursor-pointer hover:border-purple-300 transition bg-white shadow-sm group">
+                           <input type="checkbox" name="reqLargeBooth" class="w-6 h-6 mt-1 accent-purple-600 rounded cursor-pointer group-hover:scale-110 transition">
+                           <div><span class="block font-bold text-gray-800 text-lg">ขอบูธมากกว่าขนาดมาตรฐาน</span><span class="text-sm text-gray-500">ต้องการพื้นที่จัดแสดงเพิ่ม (ขนาดมาตรฐานคือ 2x2 เมตร)</span></div>
+                        </label>
+                        <div class="border-2 border-gray-100 rounded-2xl bg-white p-5 shadow-sm hover:border-purple-300 transition">
+                           <label class="flex items-center gap-4 cursor-pointer mb-2 group">
+                              <input type="checkbox" name="reqOther" id="chkOther" onchange="toggleOther(this)" class="w-6 h-6 accent-purple-600 rounded cursor-pointer group-hover:scale-110 transition"><span class="font-bold text-gray-800 text-lg">อื่น ๆ (โปรดระบุ)</span>
+                           </label>
+                           <textarea name="reqOtherDetail" id="otherInput" class="hidden w-full p-4 border border-gray-200 rounded-xl mt-3 outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-50 transition text-gray-700" placeholder="ระบุรายละเอียดเพิ่มเติม..."></textarea>
+                        </div>
+                     </div>
+                  </div>
+                  <div>
+                     <label class="block font-bold text-gray-700 mb-4 text-lg flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center text-teal-600"><i class="fas fa-microphone-alt"></i></div>
+                        ความประสงค์นำเสนอผลงาน (3 นาที) <span class="text-red-500">*</span>
+                     </label>
+                     <input type="hidden" name="presentation" id="inputPresentation">
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="option-card justify-start p-6" onclick="selectPresentation('yes', this)">
+                           <div class="check-badge"><i class="fas fa-check"></i></div>
+                           <div class="w-16 h-16 rounded-full flex-shrink-0 flex items-center justify-center bg-white border-4 border-purple-500 text-purple-500"><i
+                          class="fas fa-check text-xl"></i></div>
+                           <div><h4 class="font-bold text-gray-800 text-lg">ต้องการนำเสนอ</h4><p class="text-sm text-gray-500">บนเวที 3 นาที</p></div>
+                        </div>
+                        <div class="option-card justify-start p-6" onclick="selectPresentation('no', this)">
+                           <div class="check-badge"><i class="fas fa-check"></i></div>
+                           <div class="w-16 h-16 rounded-full flex-shrink-0 flex items-center justify-center bg-white border-4 border-red-400 text-red-400"><i class="fas fa-times text-2xl"></i></div>
+                           <div><h4 class="font-bold text-gray-800 text-lg">ไม่ต้องการ</h4><p class="text-sm text-gray-500">ไม่สะดวกร่วมรายการ</p></div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="space-y-4 pt-4">
+                     <div class="p-6 rounded-2xl border border-purple-200 bg-purple-50 flex items-start gap-4">
+                        <input type="checkbox" name="consent" required class="w-6 h-6 mt-1 accent-purple-600 rounded cursor-pointer">
+                        <span class="text-gray-800 font-medium leading-relaxed">ข้าพเจ้ายินยอมให้ใช้ข้อมูลเพื่อการจัดงาน CRA Job Fair 2026 และติดต่อประสานงานที่เกี่ยวข้อง <span class="text-red-500">*</span></span>
+                     </div>
+                     <div class="flex items-center gap-4 p-4 rounded-xl bg-orange-50 border border-orange-200 text-orange-800">
+                        <i class="fas fa-exclamation-triangle text-xl"></i><span class="font-bold">กรุณาตรวจสอบข้อมูลให้ถูกต้องก่อนกดส่งแบบฟอร์ม</span>
+                     </div>
+                  </div>
+               </div>
+               <div class="flex justify-between pt-10 mt-8 border-t border-gray-100">
+                  <button type="button" onclick="changeStep(2)" class="px-8 py-3 rounded-full border-2 border-gray-200 font-bold text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition">ย้อนกลับ</button>
+                  <button type="button" id="btnSubmitJoin" onclick="submitForm('yes')" class="px-10 py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition transform flex items-center gap-2">
+                     <i class="fas fa-paper-plane"></i> ส่งแบบฟอร์มลงทะเบียน
+                  </button>
+               </div>
+            </div>
+          </div>
+        </form>
+  </div>
+  
+  <div id="successSection" class="hidden w-full h-screen flex flex-col items-center justify-center fade-in relative z-20">
+       <div class="success-animation">
+          <svg class="checkmark active" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+             <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+             <path class="checkmark__check" fill="none" stroke="white" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+          </svg>
+       </div>
+
+       <h2 id="successTitle" class="text-3xl md:text-4xl font-bold text-[#1e293b] mb-4 font-sans text-center">ขอบคุณสำหรับการลงทะเบียน!</h2>
+       <div id="successSubtitle" class="text-[#475569] text-lg mb-8 leading-relaxed font-medium text-center max-w-xl mx-auto">
+          <p>ขอบคุณ <span id="successCompanyName" class="font-bold text-blue-600">---</span><br>ที่ให้ความสนใจเข้าร่วมงาน CRA Job Fair & Education 2026 นี้</p>
+       </div>
+       
+       <div id="lineButtonContainer" class="mb-10 w-full max-w-md mx-auto">
+           <div class="bg-white/90 backdrop-blur-sm border border-green-200 rounded-2xl p-6 shadow-xl transform transition-all hover:scale-105 text-center relative overflow-hidden">
+              <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 to-green-600"></div>
+              <p class="text-green-800 mb-4 font-bold text-lg flex items-center justify-center gap-2">
+                 <i class="fab fa-line text-3xl text-[#06C755]"></i> เข้าร่วมกลุ่มไลน์ผู้ประกอบการ
+              </p>
+              <p class="text-gray-500 text-sm mb-4">เพื่อติดตามข่าวสารและประสานงานกับเจ้าหน้าที่</p>
+              <button onclick="openLineModal()" class="w-full bg-[#06C755] hover:bg-[#05b54d] text-white py-3.5 rounded-xl font-bold shadow-md transition transform hover:-translate-y-1 flex items-center justify-center gap-2">
+                 <span>กดเพื่อเข้ากลุ่มทันที</span> <i class="fas fa-arrow-right"></i>
+              </button>
+           </div>
+       </div>
+
+       <button onclick="resetForm()" class="px-12 py-3 rounded-lg bg-gradient-to-r from-[#a855f7] to-[#ec4899] text-white font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all text-lg tracking-wide">
+          กลับหน้าแรก
+       </button>
+  </div>
+
+  <div id="lineModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop fade-in px-4">
+       <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 text-center transform transition-all scale-100">
+          <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600 shadow-inner">
+             <i class="fab fa-line text-4xl"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-800 mb-2">ยืนยันการเข้ากลุ่ม</h3>
+          <p class="text-gray-600 mb-8 leading-relaxed">ท่านต้องการเข้าสู่กลุ่มไลน์คอมมูนิตี้ (LINE Community) <br><strong>"ผู้ออกบูธ CRA Job Fair & education 2026"</strong> <br>ใช่หรือไม่?</p>
+          
+          <div class="grid grid-cols-2 gap-4">
+             <button onclick="closeLineModal()" class="py-3.5 rounded-xl border-2 border-gray-200 font-bold text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition">ไม่ใช่</button>
+             <button onclick="confirmJoinLine()" class="py-3.5 rounded-xl bg-[#06C755] text-white font-bold hover:bg-[#05b54d] shadow-lg hover:shadow-xl transition">ใช่, เข้ากลุ่ม</button>
+          </div>
+       </div>
+  </div>
+
+  </main>
+
+  <script>
+    // -------------------------------------------------------------
+    // 1. DATABASE & CONFIG
+    // -------------------------------------------------------------
+    const DB={orgTypes:[{id:1,name:"โรงพยาบาล (ภาครัฐและภาคเอกชน)",grp:"A"},{id:2,name:"องค์กรด้านการแพทย์และสุขภาพ",grp:"A"},{id:3,name:"ธุรกิจบริการสุขภาพ",grp:"A"},{id:4,name:"อุตสาหกรรมอาหารและยา",grp:"B"},{id:5,name:"วิศวกรรมชีวการแพทย์และเครื่องมือแพทย์",grp:"B"},{id:6,name:"เทคโนโลยีดิจิทัล Data และงานวิจัย",grp:"B"},{id:10,name:"ราชวิทยาลัยจุฬาภรณ์",grp:"C"},{id:7,name:"สถาบันการศึกษา/การศึกษาต่อ",grp:"C"},{id:8,name:"ที่ปรึกษาเรียนต่อและทำงานต่างประเทศ",grp:"C"},{id:9,name:"ผู้สนับสนุนโครงการ",grp:"C"}],returning: {
+    "กลุ่มทั้ง 2 วัน (12-13 ก.พ.69)": [
+       {n:"โรงพยาบาลจุฬาภรณ์", t:"ราชวิทยาลัยจุฬาภรณ์", d:"both"},
+       {n:"ราชวิทยาลัยจุฬาภรณ์", t:"ราชวิทยาลัยจุฬาภรณ์", d:"both"},
+       {n:"สถาบันบัณฑิตศึกษาจุฬาภรณ์", t:"สถาบันการศึกษา/การศึกษาต่อ", d:"both"},
+       {n:"หลักสูตร ป.โท - ป.เอก คณะแพทยศาสตร์ศรีสวางควัฒน", t:"ราชวิทยาลัยจุฬาภรณ์", d:"both"},
+       {n:"หลักสูตร ป.โท คณะเทคโนโลยีวิทยาศาสตร์สุขภาพ", t:"ราชวิทยาลัยจุฬาภรณ์", d:"both"},
+       {n:"บริษัท จัดหางาน จ๊อบไทย จำกัด", t:"ผู้สนับสนุน", d:"both"}
+    ],
+    "กลุ่มวันแรก (12 ก.พ.69) โรงพยาบาล(ภาครัฐและภาคเอกชน)": [
+       // ประเภทโรงพยาบาล
+       {n:"กลุ่มโรงพยาบาลนวมินทร์", t:"โรงพยาบาล(ภาครัฐและภาคเอกชน)", d:"12"}, {n:"บริษัท โรงพยาบาลลาดพร้าว จำกัด (มหาชน)", t:"โรงพยาบาล(ภาครัฐและภาคเอกชน)", d:"12"},
+       {n:"โรงพยาบาลกรุงเทพคริสเตียน", t:"โรงพยาบาล(ภาครัฐและภาคเอกชน)", d:"12"}, {n:"โรงพยาบาลเครือบางปะกอก-ปิยะเวท", t:"โรงพยาบาล(ภาครัฐและภาคเอกชน)", d:"12"},
+       {n:"โรงพยาบาลจุฬารัตน์ 9 แอร์พอร์ต", t:"โรงพยาบาล(ภาครัฐและภาคเอกชน)", d:"12"}, {n:"โรงพยาบาลธนบุรี ทวีวัฒนา", t:"โรงพยาบาล(ภาครัฐและภาคเอกชน)", d:"12"},
+       {n:"โรงพยาบาลบำรุงราษฎร์", t:"โรงพยาบาล(ภาครัฐและภาคเอกชน)", d:"12"}, {n:"เครือโรงพยาบาลพญาไท - เปาโล", t:"โรงพยาบาล(ภาครัฐและภาคเอกชน)", d:"12"},
+       {n:"โรงพยาบาลเมดพาร์ค", t:"โรงพยาบาล(ภาครัฐและภาคเอกชน)", d:"12"}, {n:"โรงพยาบาลวัฒนแพทย์ ตรัง", t:"โรงพยาบาล(ภาครัฐและภาคเอกชน)", d:"12"},
+       {n:"โรงพยาบาลวิชัยยุทธ", t:"โรงพยาบาล(ภาครัฐและภาคเอกชน)", d:"12"}, {n:"โรงพยาบาลวิภาราม", t:"โรงพยาบาล(ภาครัฐและภาคเอกชน)", d:"12"},
+       {n:"โรงพยาบาลวิภาวดี", t:"โรงพยาบาล(ภาครัฐและภาคเอกชน)", d:"12"},
+       {n:"โรงพยาบาลศิครินทร์", t:"โรงพยาบาล(ภาครัฐและภาคเอกชน)", d:"12"}, {n:"โรงพยาบาลสมิติเวช", t:"โรงพยาบาล(ภาครัฐและภาคเอกชน)", d:"12"},
+       {n:"โรงพยาบาลสุขุมวิท", t:"โรงพยาบาล(ภาครัฐและภาคเอกชน)", d:"12"}, {n:"โรงพยาบาลหัวเฉียว", t:"โรงพยาบาล(ภาครัฐและภาคเอกชน)", d:"12"},
+       {n:"โรงพยาบาลสถาบันโรคไตภูมิราชนครินทร์", t:"โรงพยาบาล(ภาครัฐและภาคเอกชน)", d:"12"}, {n:"โรงพยาบาลราชวิถี 2 (รังสิต)", t:"โรงพยาบาล(ภาครัฐและภาคเอกชน)", d:"12"},
+       {n:"โรงพยาบาลรามาธิบดี", t:"โรงพยาบาล(ภาครัฐและภาคเอกชน)", d:"12"}, {n:"โรงพยาบาลจุฬาลงกรณ์ สภากาชาดไทย", t:"โรงพยาบาล(ภาครัฐและภาคเอกชน)", d:"12"},
+       {n:"โรงพยาบาลธรรมศาสตร์เฉลิมพระเกียรติ", t:"โรงพยาบาล(ภาครัฐและภาคเอกชน)", d:"12"}, {n:"โรงพยาบาลภูมิพลอดุลยเดช กรมการแพทย์ทหารอากาศ", t:"โรงพยาบาล(ภาครัฐและภาคเอกชน)", d:"12"}
+    ],
+     "กลุ่มวันแรก (12 ก.พ.69) องค์กรด้านการแพทย์และสุขภาพ": [// ประเภทองค์กรแพทย์
+       {n:"สถาบันมะเร็งแห่งชาติ", t:"องค์กรด้านการแพทย์และสุขภาพ", d:"12"}, {n:"กรมการแพทย์ กระทรวงสาธารณสุข", t:"องค์กรด้านการแพทย์และสุขภาพ", d:"12"},
+       {n:"สำนักงานหลักประกันสุขภาพแห่งชาติ (สปสช)", t:"องค์กรด้านการแพทย์และสุขภาพ", d:"12"}, {n:"สถาบันเวชศาสตร์สมเด็จพระสังฆราชญาณสังวรเพื่อผู้สูงอายุ", t:"องค์กรด้านการแพทย์และสุขภาพ", d:"12"},
+    ],
+         "กลุ่มวันแรก (12 ก.พ.69) ธุรกิจสุขภาพ": [// ธุรกิจสุขภาพ
+       {n:"บริษัท ประชาชื่น อิมเมจจิ้ง เซ็นเตอร์ จำกัด", t:"ธุรกิจบริการสุขภาพ", d:"12"}, {n:"บริษัท ธนบุรี เฮลท์แคร์ กรุ๊ป จำกัด (มหาชน)", t:"ธุรกิจบริการสุขภาพ", d:"12"},
+       {n:"เดอะซีเนียร์ เฮลท์ แคร์ (The Senior Health Care)", t:"ธุรกิจบริการสุขภาพ", d:"12"}, {n:"บริษัท อาร์เอ็กซ์ เวลเนส จำกัด", t:"ธุรกิจบริการสุขภาพ", d:"12"},
+       {n:"บจก.ชีวาศรม อินเตอร์เนชั่นแนล เฮลท์ รีสอร์ท จำกัด", t:"ธุรกิจบริการสุขภาพ", d:"12"}, {n:"บริษัทกระตุ้นพัฒนาการ Mental Kids", t:"ธุรกิจบริการสุขภาพ", d:"12"},
+       {n:"Naya Residence by Livwell", t:"ธุรกิจบริการสุขภาพ", d:"12"}
+    ],
+    "กลุ่มวันที่สอง (13 ก.พ.69) อุตสาหกรรมอาหารและยา": [
+       {n:"บริษัท บุญรอดบริวเวอรี่ จำกัด", t:"อุตสาหกรรมอาหารและยา", d:"13"}],
+
+    "กลุ่มวันที่สอง (13 ก.พ.69) วิศวกรรมชีวการแพทย์และเครื่องมือแพทย์" : [{n:"บริษัท ซี เอ็ม ซี ไบโอเท็ค จำกัด และไทยจีแอล (Healthcare Enterprises)", t:"วิศวกรรมชีวการแพทย์และเครื่องมือแพทย์", d:"13"}],  
+      
+    "กลุ่มวันที่สอง (13 ก.พ.69) เทคโนโลยีดิจิทัล Data และงานวิจัย" : [ {n:"บริษัท เบญจจินดา โฮลดิ้ง จำกัด", t:"เทคโนโลยีดิจิทัล Data และงานวิจัย", d:"13"}, {n:"บริษัท แอดวานซ์ อินโฟร์ เซอร์วิส จำกัด (มหาชน) (AIS)", t:"เทคโนโลยีดิจิทัล Data และงานวิจัย", d:"13"},
+       {n:"บริษัท เอส เทลลิเจนซ์ จำกัด", t:"เทคโนโลยีดิจิทัล Data และงานวิจัย", d:"13"}, {n:"สำนักงานพัฒนาธุรกรรมทางอิเล็กทรอนิกส์ (ETDA)", t:"เทคโนโลยีดิจิทัล Data และงานวิจัย", d:"13"},
+       {n:"สำนักงานส่งเสริมเศรษฐกิจดิจิทัล (depa)", t:"เทคโนโลยีดิจิทัล Data และงานวิจัย", d:"13"}, {n:"สำนักงานพัฒนาวิทยาศาสตร์และเทคโนโลยีแห่งชาติ (สวทช.)", t:"เทคโนโลยีดิจิทัล Data และงานวิจัย", d:"13"},
+       {n:"ศูนย์สารสนเทศและนวัตกรรมข้อมูลศิริราช มหาวิทยาลัยมหิดล", t:"เทคโนโลยีดิจิทัล Data และงานวิจัย", d:"13"}, {n:"สำนักงานพัฒนาเทคโนโลยีอวกาศและภูมิสารสนเทศ (องค์การมหาชน)", t:"เทคโนโลยีดิจิทัล Data และงานวิจัย", d:"13"}
+    ]
+  }
+};
+    let currentStep=1;
+
+    // 2. LOGIC
+    function selectStatus(status,el){
+        document.querySelectorAll('#step1 .option-card').forEach(c=>c.classList.remove('selected'));
+        el.classList.add('selected');
+        document.getElementById('inputStatus').value=status==='join'?"เข้าร่วมงาน":"ไม่เข้าร่วมงาน";
+        
+        if(status==='no'){
+            const noJoinForm = document.getElementById('noJoinForm');
+            noJoinForm.classList.remove('hidden');
+            document.getElementById('joinForm').classList.add('hidden');
+            document.getElementById('progressBarContainer').classList.add('hidden');
+            // SCROLL TO NO JOIN FORM
+            noJoinForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }else{
+            document.getElementById('noJoinForm').classList.add('hidden');
+            const joinForm = document.getElementById('joinForm');
+            joinForm.classList.remove('hidden');
+            document.getElementById('progressBarContainer').classList.remove('hidden');
+            // SCROLL TO JOIN FORM
+            joinForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    function handleType(type,el){
+        el.parentElement.querySelectorAll('.option-card').forEach(c=>c.classList.remove('selected'));
+        el.classList.add('selected');
+        
+        const map={new:"บริษัทลงทะเบียนใหม่",return:"บริษัทที่ร่วมงานปีที่ผ่านมา",edu:"ด้านการศึกษา/ทำงานต่างประเทศ/สนับสนุน"};
+        document.getElementById('joinType').value=map[type];
+        
+        // Reset Inputs Logic
+        document.getElementById('newEduName').value = "";
+        document.getElementById('newEduOrgSelect').value = "";
+        document.getElementById('eventDate').value = "";
+        document.getElementById('returningSelect').value = "";
+        document.getElementById('autoOrgType').innerText = "-";
+        document.getElementById('autoDateText').innerText = "-";
+        document.getElementById('autoDateDesc').innerText = "-";
+        document.getElementById('autoOrgTypeVal').value = "";
+        document.getElementById('autoDateVal').value = "";
+        document.getElementById('returningAutoInfo').classList.add('hidden');
+
+        document.querySelectorAll('.date-card').forEach(c => {
+            c.classList.remove('selected', 'border-blue-500', 'border-teal-500', 'border-purple-500', 'bg-blue-50', 'bg-teal-50', 'bg-purple-50');
+            c.classList.add('border-transparent', 'bg-white');
+        });
+
+        document.getElementById('btnNext1').classList.add('hidden');
+
+        // Show Content & Scroll
+        const dynamicContent = document.getElementById('dynamicContent');
+        dynamicContent.classList.remove('hidden');
+        
+        const newEduForm=document.getElementById('newEduForm');
+        const returningForm=document.getElementById('returningForm');
+        const dateBoth=document.getElementById('dateCardBoth');
+
+        if(type==='return'){
+            newEduForm.classList.add('hidden');
+            returningForm.classList.remove('hidden');
+            renderReturningOptions();
+        }else{
+            returningForm.classList.add('hidden');
+            newEduForm.classList.remove('hidden');
+            if(type==='edu')dateBoth.classList.remove('hidden');
+            else dateBoth.classList.add('hidden');
+            renderOrgOptions(type);
+        }
+        // SCROLL TO DYNAMIC CONTENT
+        dynamicContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function renderOrgOptions(type){const select=document.getElementById('newEduOrgSelect');select.innerHTML='<option value="">-- กรุณาเลือก --</option>';DB.orgTypes.forEach(t=>{if((type==='new'&&t.id<=6)||(type==='edu'&&t.id>=7)){let opt=document.createElement('option');opt.value=t.name;opt.text=t.name;opt.dataset.grp=t.grp;select.appendChild(opt);}});}
+    function renderReturningOptions(){const select=document.getElementById('returningSelect');select.innerHTML='<option value="">-- เลือกบริษัทที่ร่วมงานปีที่ผ่านมา --</option>';for(let g in DB.returning){let grp=document.createElement('optgroup');grp.label=g;DB.returning[g].forEach(c=>{let opt=document.createElement('option');opt.value=c.n;opt.text=c.n;opt.dataset.type=c.t;opt.dataset.date=c.d;grp.appendChild(opt);});select.appendChild(grp);}}
+    function handleReturningChange(sel){const btnNext=document.getElementById('btnNext1');const autoInfo=document.getElementById('returningAutoInfo');if(!sel.value){autoInfo.classList.add('hidden');btnNext.classList.add('hidden');return;}const opt=sel.options[sel.selectedIndex];document.getElementById('autoOrgType').innerText=opt.dataset.type;document.getElementById('autoOrgTypeVal').value=opt.dataset.type;let dCode=opt.dataset.date;let dTxt=(dCode==='12')?"12 กุมภาพันธ์ 2569":(dCode==='13'?"13 กุมภาพันธ์ 2569":"เข้าร่วมทั้ง 2 วัน (12-13 กุมภาพันธ์ 2569)");let dDesc=(dCode==='12')?"สำหรับโรงพยาบาล องค์กรด้านการแพทย์ และธุรกิจบริการสุขภาพ":(dCode==='13'?"สำหรับสายเทคโนโลยี Data วิจัย อุตสาหกรรมอาหาร-ยา":"สำหรับสถาบันการศึกษาและผู้สนับสนุน");document.getElementById('autoDateText').innerText=dTxt;document.getElementById('autoDateDesc').innerText=dDesc;document.getElementById('autoDateVal').value=dTxt;autoInfo.classList.remove('hidden');autoInfo.classList.add('fade-in');btnNext.classList.remove('hidden');}
+    function handleOrgChange(sel){if(!sel.value){document.getElementById('dateSelectionArea').classList.add('hidden');return;}const grp=sel.options[sel.selectedIndex].dataset.grp;document.getElementById('dateSelectionArea').classList.remove('hidden');if(grp==='A')selectDateCard('12');else if(grp==='B')selectDateCard('13');else selectDateCard('both');}
+    function selectDateCard(code){document.querySelectorAll('.date-card').forEach(c=>{c.classList.remove('selected','border-blue-500','border-teal-500','border-purple-500','bg-blue-50','bg-teal-50','bg-purple-50');c.classList.add('border-transparent','bg-white');});let id=(code==='both')?'dateCardBoth':`dateCard${code}`;const card=document.getElementById(id);card.classList.remove('border-transparent','bg-white');card.classList.add('selected');if(code==='12')card.classList.add('border-blue-500','bg-blue-50');else if(code==='13')card.classList.add('border-teal-500','bg-teal-50');else card.classList.add('border-purple-500','bg-purple-50');let txt=(code==='12')?"12 กุมภาพันธ์ 2569":(code==='13'?"13 กุมภาพันธ์ 2569":"เข้าร่วมทั้ง 2 วัน (12-13 กุมภาพันธ์ 2569)");document.getElementById('eventDate').value=txt;checkNewEduForm();}
+    function checkNewEduForm(){const name=document.getElementById('newEduName').value;const org=document.getElementById('newEduOrgSelect').value;const date=document.getElementById('eventDate').value;const btn=document.getElementById('btnNext1');if(name&&org&&date)btn.classList.remove('hidden');else btn.classList.add('hidden');}
+    document.getElementById('newEduName').addEventListener('input',checkNewEduForm);
+    function suggestEmail(el){const box=document.getElementById('emailSuggest');const val=el.value;if(!val||val.includes('@')){box.classList.add('hidden');return;}const doms=['cra.ac.th','gmail.com','hotmail.com','outlook.com'];box.innerHTML=doms.map(d=>`<div class="px-4 py-3 hover:bg-gray-100 cursor-pointer text-gray-700" onclick="pickMail('${val}@${d}')">${val}<b>@${d}</b></div>`).join('');box.classList.remove('hidden');}
+    function pickMail(v){document.getElementById('emailInput').value=v;document.getElementById('emailSuggest').classList.add('hidden');}
+    function formatPhone(el){let v=el.value.replace(/\D/g,'');if(v.length>10)v=v.slice(0,10);if(v.length>3)v=v.slice(0,3)+'-'+v.slice(3);if(v.length>7)v=v.slice(0,7)+'-'+v.slice(7);el.value=v;}
+    function toggleLine(type){document.getElementById('lineType').value=type;const inpId=document.getElementById('lineInput');const inpPh=document.getElementById('linePhoneInput');const bg=document.getElementById('toggleBg');const btnId=document.getElementById('btnLineId');const btnPh=document.getElementById('btnLinePhone');bg.classList.remove('bg-blue-500','bg-gray-200');bg.classList.add('bg-green-500');if(type==='id'){inpId.classList.remove('hidden');inpPh.classList.add('hidden');bg.style.transform='translateX(0)';btnId.classList.add('text-white');btnId.classList.remove('text-gray-500');btnPh.classList.add('text-gray-500');btnPh.classList.remove('text-white');}else{inpPh.classList.remove('hidden');inpId.classList.add('hidden');bg.style.transform='translateX(100%)';btnPh.classList.add('text-white');btnPh.classList.remove('text-gray-500');btnId.classList.add('text-gray-500');btnId.classList.remove('text-white');}}
+    function adjStaff(n){const el=document.getElementById('staffCount');let v=parseInt(el.value)+n;if(v<1)v=1;if(v>5)v=5;el.value=v;}
+    function toggleOther(chk){const inp=document.getElementById('otherInput');if(chk.checked){inp.classList.remove('hidden');inp.focus();}else{inp.classList.add('hidden');inp.value="";}}
+    function selectPresentation(val,el){el.parentElement.querySelectorAll('.option-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');document.getElementById('inputPresentation').value=val==='yes'?'มีความประสงค์นำเสนอ':'ไม่มีความประสงค์นำเสนอ';}
+    function changeStep(step){if(step>currentStep&&!validateStep(currentStep))return;document.getElementById('step1').classList.add('hidden');document.getElementById('step2').classList.add('hidden');document.getElementById('step3').classList.add('hidden');document.getElementById(`step${step}`).classList.remove('hidden');const fills=['0%','50%','100%'];document.getElementById('progressFill').style.width=fills[step-1];currentStep=step;window.scrollTo({top:0,behavior:'smooth'});}
+function validateStep(step) {
+    const div = document.getElementById(`step${step}`);
+    const inps = div.querySelectorAll('input:not([type="hidden"]):not(.hidden), select:not(.hidden)');
+    let valid = true;
+
+    // วนลูปเช็ค Input ที่จำเป็น
+    inps.forEach(i => {
+        if (i.offsetParent !== null && i.hasAttribute('required')) {
+            if (!i.value || (i.type === 'checkbox' && !i.checked)) {
+                i.classList.add('ring-2', 'ring-red-500', 'bg-red-50');
+                valid = false;
+            } else {
+                i.classList.remove('ring-2', 'ring-red-500', 'bg-red-50');
+            }
+        }
+    });
+
+    // เช็คพิเศษสำหรับ Step 3 (ความประสงค์นำเสนอ)
+    if (step === 3) {
+        const presentVal = document.getElementById('inputPresentation').value;
+        if (!presentVal) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'ข้อมูลไม่ครบถ้วน',
+                text: 'กรุณาระบุความประสงค์นำเสนอหน่วยงาน',
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'ตกลง'
+            });
+            valid = false;
+        }
+    }
+
+    // ถ้ามีข้อมูลไม่ครบ ให้เลื่อนไปหาและแจ้งเตือน
+    if (!valid) {
+        const firstError = div.querySelector('.ring-red-500');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // แจ้งเตือนรวมว่ากรอกไม่ครบ
+        Swal.fire({
+            icon: 'warning',
+            title: 'ข้อมูลไม่ครบถ้วน',
+            text: 'กรุณากรอกข้อมูลในช่องที่มีเครื่องหมาย * ให้ครบถ้วน',
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'ตกลง'
+        });
+    }
+    
+    return valid;
+}
+
+ // --- 3. SUBMIT LOGIC (ปรับปรุงเพื่อรันบน GitHub Pages) ---
+    // ก๊อปปี้ Web App URL จาก Google Apps Script มาวางที่นี่
+    const SCRIPT_URL = 'ใส่_WEB_APP_URL_ที่นี่'; 
+
+    function submitForm(mode){
+        if(mode==='yes'&&!validateStep(3))return;
+        
+        if(mode === 'no'){
+            const cNo = document.getElementById('companyNo');
+            if(!cNo.value){
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'กรุณาระบุข้อมูล',
+                    text: 'กรุณาระบุชื่อหน่วยงานก่อนส่งข้อมูล',
+                    confirmButtonColor: '#ef4444',
+                    confirmButtonText: 'ตกลง'
+                }).then(() => {
+                    setTimeout(() => cNo.focus(), 300);
+                });
+                return;
+            }
+        }
+        
+        const form = document.getElementById('craForm');
+        // ดึงข้อมูลจาก Form ทั้งหมด
+        const data = Object.fromEntries(new FormData(form).entries());
+        
+        // จัดการค่า Checkbox ให้เป็น true/false
+        data.reqLargeBooth = form.querySelector('[name="reqLargeBooth"]')?.checked;
+        data.reqOther = form.querySelector('[name="reqOther"]')?.checked;
+        data.consent = form.querySelector('[name="consent"]')?.checked;
+        
+        const titleEl = document.getElementById('successTitle');
+        const subtitleEl = document.getElementById('successSubtitle');
+        const lineBtnEl = document.getElementById('lineButtonContainer');
+        
+        // แยกกรณี สละสิทธิ์ VS เข้าร่วม เพื่อแสดงผลหน้า Success
+        if(mode==='no'){
+            data.status = 'ไม่เข้าร่วมงาน';
+            data.company = document.getElementById('companyNo').value;
+            titleEl.innerText = "รับทราบข้อมูลการสละสิทธิ์";
+            subtitleEl.innerHTML = `ราชวิทยาลัยจุฬาภรณ์หวังว่าจะได้ร่วมงานกับ<br><strong>${data.company}</strong><br>ในโอกาสถัดไป`;
+            lineBtnEl.classList.add('hidden'); 
+        } else {
+            data.status = 'เข้าร่วมงาน';
+            const type = document.getElementById('joinType').value;
+            if(type && type.includes("บริษัทที่ร่วมงานปีที่ผ่านมา")){
+                const sel = document.getElementById('returningSelect');
+                data.company = sel.options[sel.selectedIndex].text;
+                data.orgType = document.getElementById('autoOrgTypeVal').value;
+                data.eventDate = document.getElementById('autoDateVal').value;
+            } else {
+                data.company = document.getElementById('newEduName').value;
+            }
+            titleEl.innerText = "ขอบคุณสำหรับการลงทะเบียน!";
+            subtitleEl.innerHTML = `ขอบคุณ <span class="font-bold text-blue-600">${data.company}</span><br>ที่ให้ความสนใจเข้าร่วมงาน CRA Job Fair & Education 2026 นี้`;
+            lineBtnEl.classList.remove('hidden');
+        }
+
+        // แสดงสถานะการโหลดที่ปุ่ม
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.innerText = "กำลังบันทึก...";
+        btn.disabled = true;
+
+        // ส่งข้อมูลไปที่ Google Apps Script ผ่าน Fetch API (รองรับการรันข้าม Domain)
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors', // จำเป็นต้องใช้ mode นี้สำหรับการส่งไป Google Script จากภายนอก
+            cache: 'no-cache',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }).then(() => {
+            // เมื่อส่งสำเร็จ เปลี่ยนไปหน้า Success
+            document.getElementById('formSection').style.display = 'none';
+            document.getElementById('successSection').classList.remove('hidden');
+            window.scrollTo({top:0, behavior:'smooth'});
+        }).catch(error => {
+            Swal.fire({
+                icon: 'error',
+                title: 'เกิดข้อผิดพลาด',
+                text: 'ไม่สามารถติดต่อเซิร์ฟเวอร์ได้: ' + error
+            });
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+    }
+
+    // --- 4. RESET FUNCTION (คืนค่าปุ่มด้วย) ---
+    function resetForm() {
+       // 1. Swap Sections
+       document.getElementById('successSection').classList.add('hidden');
+       document.getElementById('formSection').style.display = 'block';
+
+       // 2. Clear Inputs
+       document.getElementById('craForm').reset();
+
+       // 3. Reset Variables & UI
+       currentStep = 1;
+       
+       document.getElementById('joinForm').classList.add('hidden');
+       document.getElementById('noJoinForm').classList.add('hidden');
+       document.getElementById('progressBarContainer').classList.add('hidden');
+       document.getElementById('dynamicContent').classList.add('hidden');
+       
+       document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+       document.querySelectorAll('.date-card').forEach(c => {
+           c.classList.remove('border-blue-500','border-teal-500','border-purple-500','bg-blue-50','bg-teal-50','bg-purple-50');
+           c.classList.add('border-transparent','bg-white');
+       });
+
+       // 4. *** RESET BUTTONS STATE *** (สำคัญมาก)
+       const btnJoin = document.getElementById('btnSubmitJoin');
+       if(btnJoin) { btnJoin.innerHTML = '<i class="fas fa-paper-plane"></i> ส่งแบบฟอร์มลงทะเบียน'; btnJoin.disabled = false; }
+
+       const btnDecline = document.getElementById('btnSubmitDecline');
+       if(btnDecline) { btnDecline.innerText = 'ส่งข้อมูลสละสิทธิ์'; btnDecline.disabled = false; }
+
+       // Go to Step 1
+       changeStep(1); 
+       window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    // Modal
+    function openLineModal(){document.getElementById('lineModal').classList.remove('hidden');}
+    function closeLineModal(){document.getElementById('lineModal').classList.add('hidden');}
+    function confirmJoinLine(){window.open('https://line.me/ti/g2/2Com0oC0l7rnm9UBKXWkewyirdCZ0GfOQAJLAQ?utm_source=invitation&utm_medium=link_copy&utm_campaign=default','_blank');closeLineModal();}
+  </script>
+</body>
+</html>
